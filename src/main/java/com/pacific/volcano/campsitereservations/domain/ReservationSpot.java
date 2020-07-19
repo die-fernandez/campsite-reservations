@@ -1,18 +1,19 @@
 package com.pacific.volcano.campsitereservations.domain;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDate;
 
+@Entity
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
-@NoArgsConstructor
-@Entity
 public class ReservationSpot {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
     @Column(unique = true)
     private LocalDate reservedDate;
