@@ -1,4 +1,4 @@
-package com.pacific.volcano.campsitereservations.controller;
+package com.pacific.volcano.campsitereservations.api;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.pacific.volcano.campsitereservations.domain.Reservation;
@@ -8,14 +8,13 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Data
 @Builder
 public class ReservationResponse {
 
-    private String id;
+    private Long id;
     private String email;
     private String fullName;
     private List<LocalDate> reservedDays;

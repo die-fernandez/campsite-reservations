@@ -1,4 +1,4 @@
-package com.pacific.volcano.campsitereservations.controller;
+package com.pacific.volcano.campsitereservations.api;
 
 import lombok.Builder;
 import lombok.Data;

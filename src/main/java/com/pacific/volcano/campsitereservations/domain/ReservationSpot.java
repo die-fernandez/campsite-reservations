@@ -9,13 +9,15 @@ import java.time.LocalDate;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Getter
 @Setter
 public class ReservationSpot {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private String id;
+    private Long id;
     @Column(unique = true)
+    @EqualsAndHashCode.Include
     private LocalDate reservedDate;
     @ManyToOne
     private Reservation reservation;

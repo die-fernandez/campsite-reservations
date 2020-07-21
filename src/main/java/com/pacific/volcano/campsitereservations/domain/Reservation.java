@@ -1,13 +1,21 @@
 package com.pacific.volcano.campsitereservations.domain;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import javax.persistence.*;
-import java.time.LocalDate;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.Set;
 @Entity
 @Builder
@@ -18,7 +26,7 @@ import java.util.Set;
 public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private String id;
+    private Long id;
     private String email;
     private String fullName;
     //audit
@@ -27,7 +35,7 @@ public class Reservation {
     @UpdateTimestamp
     private LocalDateTime updateDate;
 
-    @OneToMany(mappedBy="reservation", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy="reservation", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ReservationSpot> reservationSpots;
 
 }

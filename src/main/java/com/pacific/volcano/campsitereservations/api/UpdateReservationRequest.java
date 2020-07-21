@@ -1,13 +1,14 @@
-package com.pacific.volcano.campsitereservations.controller;
+package com.pacific.volcano.campsitereservations.api;
 
 import lombok.Data;
 
 import java.time.LocalDate;
 
 @Data
-public class ReservationRequest {
+public class UpdateReservationRequest {
+
     private LocalDate arrivalDate;
     private LocalDate departureDate;
-    private String email;
     private String fullname;
+
 }

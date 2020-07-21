@@ -1,5 +1,6 @@
 package com.pacific.volcano.campsitereservations.controller;
 
+import com.pacific.volcano.campsitereservations.api.AvailabilityResponse;
 import com.pacific.volcano.campsitereservations.service.ReservationService;
 import lombok.AllArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
