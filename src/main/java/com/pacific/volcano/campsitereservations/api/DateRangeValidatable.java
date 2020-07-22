@@ -1,4 +1,8 @@
 package com.pacific.volcano.campsitereservations.api;
 
-public interface DateRangeValidable {
+import java.time.LocalDate;
+
+public interface DateRangeValidatable {
+    LocalDate getArrivalDate();
+    LocalDate getDepartureDate();
 }

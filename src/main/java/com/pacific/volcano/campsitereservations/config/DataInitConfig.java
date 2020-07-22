@@ -8,6 +8,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.time.LocalDate;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Configuration
 @Slf4j
@@ -38,7 +40,10 @@ public class DataInitConfig {
                             .arrivalDate(LocalDate.of(2020,8,22))
                             .departureDate(LocalDate.of(2020,8,24))
                             .build());
+
         };
+
+
 
     }
 }
