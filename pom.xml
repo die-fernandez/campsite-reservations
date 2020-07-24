@@ -83,6 +83,11 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.googlecode.thread-weaver</groupId>
+			<artifactId>threadweaver</artifactId>
+			<version>0.2</version>
+		</dependency>
 	</dependencies>
 
 	<build>

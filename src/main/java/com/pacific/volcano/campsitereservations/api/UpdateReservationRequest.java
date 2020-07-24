@@ -6,7 +6,7 @@ import javax.validation.constraints.NotBlank;
 import java.time.LocalDate;
 
 @Data
-public class UpdateReservationRequest implements DateRangeValidatable{
+public class UpdateReservationRequest implements DateRangeValidatable {
 
     private LocalDate arrivalDate;
     private LocalDate departureDate;

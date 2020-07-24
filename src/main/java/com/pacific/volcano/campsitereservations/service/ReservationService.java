@@ -30,17 +30,13 @@ public class ReservationService {
 
 
     public Reservation create(ReservationRequest reservationRequest) {
-        Set<ReservationSpot> alreadyReservedSpots = reservationSpotRepository
-                        .findByReservedDateIsBetween(reservationRequest.getArrivalDate(),
-                                        reservationRequest.getDepartureDate());
-        if(CollectionUtils.isNotEmpty(alreadyReservedSpots)) {
+        //check availability before submitting creation
+        if (spotsAlreadyReserved(reservationRequest)) {
             throw new CampsiteUnavailableException("No availability for selected dates");
         }
-        Reservation newReservation = Reservation.builder()
-                .email(reservationRequest.getEmail())
-                .fullName(reservationRequest.getFullname())
-                .build();
-        newReservation.setReservationSpots(spotsFrom(reservationRequest.getArrivalDate(),reservationRequest.getDepartureDate(),newReservation));
+        Reservation newReservation = generateReservation(reservationRequest);
+        //at this point reservation could still fail if there's another attempt at the same time
+        //we let the database handle the concurrency
         try {
             return reservationRepository.save(newReservation);
         } catch(DataIntegrityViolationException exc) {
@@ -48,10 +44,20 @@ public class ReservationService {
         }
     }
 
+    private Reservation generateReservation(ReservationRequest reservationRequest) {
+        Reservation newReservation = Reservation.builder()
+                .email(reservationRequest.getEmail())
+                .fullName(reservationRequest.getFullname())
+                .build();
+        newReservation.setReservationSpots(spotsFrom(reservationRequest.getArrivalDate(),reservationRequest.getDepartureDate(),newReservation));
+        return newReservation;
+    }
+
     public Set<LocalDate> findAvailabilityBetween(LocalDate from, LocalDate to) {
-        Set<ReservationSpot> occupancy = this.reservationSpotRepository.findByReservedDateIsBetween(from, to);
+        LocalDate adjustedTo = to.plusDays(1);
+        Set<ReservationSpot> occupancy = this.reservationSpotRepository.findByReservedDateIsBetween(from, adjustedTo);
         Set<LocalDate> occupancyDates = occupancy.stream().map(ReservationSpot::getReservedDate).collect(Collectors.toSet());
-        Set<LocalDate> requestedDates = from.datesUntil(to).collect(Collectors.toSet());
+        Set<LocalDate> requestedDates = from.datesUntil(adjustedTo).collect(Collectors.toSet());
         return SetUtils.difference(requestedDates,occupancyDates);
     }
 
@@ -61,20 +67,33 @@ public class ReservationService {
 
     public Reservation update(UpdateReservationRequest updateReservationRequest, Long id) {
         //check availability before submitting update to avoid losing old reserved spots in case of no avail
-        Set<ReservationSpot> alreadyReservedSpots = reservationSpotRepository
-                        .findByReservedDateIsBetween(updateReservationRequest.getArrivalDate(),
-                                        updateReservationRequest.getDepartureDate()).stream()
-                        .filter(i -> !i.getId().equals(id)).collect(Collectors.toSet());
-        if(CollectionUtils.isNotEmpty(alreadyReservedSpots)) {
+        if(spotsAlreadyReserved(updateReservationRequest, id)) {
             throw new CampsiteUnavailableException("No availability for selected dates");
         }
         Reservation reservation = this.reservationRepository.getOne(id);
         this.updateReservationInfo(updateReservationRequest, reservation);
+        //at this point reservations could still fail if there's another attempt at the same time
+        //we let the database handle the concurrency
         try {
             return reservationRepository.save(reservation);
         } catch(DataIntegrityViolationException exc) {
             throw new CampsiteUnavailableException("No availability for selected dates",exc);
         }
+    }
+
+    private boolean spotsAlreadyReserved(UpdateReservationRequest updateReservationRequest, Long id) {
+        Set<ReservationSpot> alreadyReservedSpots = reservationSpotRepository
+                        .findByReservedDateIsBetween(updateReservationRequest.getArrivalDate(),
+                                        updateReservationRequest.getDepartureDate()).stream()
+                        .filter(i -> !i.getId().equals(id)).collect(Collectors.toSet());
+        return CollectionUtils.isNotEmpty(alreadyReservedSpots);
+    }
+
+    private boolean spotsAlreadyReserved(ReservationRequest reservationRequest) {
+        Set<ReservationSpot> alreadyReservedSpots = reservationSpotRepository
+                        .findByReservedDateIsBetween(reservationRequest.getArrivalDate(),
+                                        reservationRequest.getDepartureDate());
+        return CollectionUtils.isNotEmpty(alreadyReservedSpots);
     }
 
     private void updateReservationInfo(UpdateReservationRequest updateReservationRequest, Reservation reservation) {
