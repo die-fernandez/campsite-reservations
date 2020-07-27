@@ -59,7 +59,8 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler({CampsiteUnavailableException.class})
-    public ResponseEntity<ErrorResponse> handleCampsiteUnavailableException(CampsiteUnavailableException ex, WebRequest request) {
+    public ResponseEntity<ErrorResponse> handleCampsiteUnavailableException(CampsiteUnavailableException ex,
+                                                                            WebRequest request) {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .status(HttpStatus.CONFLICT)
                 .message(ex.getLocalizedMessage()).build();
@@ -67,7 +68,8 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler({CampsiteConcurrentReservation.class})
-    public ResponseEntity<ErrorResponse> handleCampsiteConcurrentReservationException(CampsiteConcurrentReservation ex, WebRequest request) {
+    public ResponseEntity<ErrorResponse> handleCampsiteConcurrentReservationException(CampsiteConcurrentReservation ex,
+                                                                                      WebRequest request) {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .status(HttpStatus.CONFLICT)
                 .message(ex.getLocalizedMessage()).build();
@@ -75,7 +77,8 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler({ReservationNotFoundException.class})
-    public ResponseEntity<ErrorResponse> handleReservationNotFoundException(ReservationNotFoundException ex, WebRequest request) {
+    public ResponseEntity<ErrorResponse> handleReservationNotFoundException(ReservationNotFoundException ex,
+                                                                            WebRequest request) {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .status(HttpStatus.NOT_FOUND)
                 .message(ex.getLocalizedMessage()).build();
@@ -87,10 +90,9 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .message("internal server error").build();
-        logger.error("unexpected error",ex);
-        return handleExceptionInternal(ex,errorResponse,new HttpHeaders(),HttpStatus.INTERNAL_SERVER_ERROR,request);
+        logger.error("unexpected error", ex);
+        return handleExceptionInternal(ex, errorResponse, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
     }
-
 
 
 }

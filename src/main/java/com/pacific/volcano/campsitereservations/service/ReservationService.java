@@ -2,6 +2,7 @@ package com.pacific.volcano.campsitereservations.service;
 
 import com.pacific.volcano.campsitereservations.api.ReservationRequest;
 import com.pacific.volcano.campsitereservations.api.UpdateReservationRequest;
+import com.pacific.volcano.campsitereservations.domain.DateRange;
 import com.pacific.volcano.campsitereservations.domain.Reservation;
 import com.pacific.volcano.campsitereservations.domain.ReservationSpot;
 import com.pacific.volcano.campsitereservations.exception.CampsiteConcurrentReservation;
@@ -9,7 +10,6 @@ import com.pacific.volcano.campsitereservations.exception.CampsiteUnavailableExc
 import com.pacific.volcano.campsitereservations.exception.ReservationNotFoundException;
 import com.pacific.volcano.campsitereservations.repository.ReservationRepository;
 import com.pacific.volcano.campsitereservations.repository.ReservationSpotRepository;
-import dto.DateRangeDto;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -21,7 +21,9 @@ import org.springframework.validation.annotation.Validated;
 
 import javax.validation.Valid;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.pacific.volcano.campsitereservations.domain.ReservationSpotGenerator.spotsFrom;
@@ -41,6 +43,7 @@ public class ReservationService {
         //we let the database handle the concurrency
         log.info("Creating new reservation for request {}", reservationRequest.toString());
         if (spotsAlreadyReserved(reservationRequest)) {
+            log.warn("Cannot create reservation: dates are unavailable. For request {}", reservationRequest.toString());
             throw new CampsiteUnavailableException("No availability for selected dates");
         }
         Reservation newReservation = generateReservation(reservationRequest);
@@ -49,7 +52,8 @@ public class ReservationService {
             return reservationRepository.save(newReservation);
         } catch (DataIntegrityViolationException exc) {
             log.error("Concurrent reservation", exc);
-            throw new CampsiteConcurrentReservation("There was a problem while trying to reserve your spots, please try again", exc);
+            throw new CampsiteConcurrentReservation(
+                    "There was a problem while trying to reserve your spots, please try again", exc);
         }
     }
 
@@ -59,20 +63,24 @@ public class ReservationService {
                 .fullName(reservationRequest.getFullname())
                 .active(true)
                 .build();
-        newReservation.setReservationSpots(spotsFrom(reservationRequest.getArrivalDate(), reservationRequest.getDepartureDate(), newReservation));
+        newReservation.setReservationSpots(spotsFrom(reservationRequest.getArrivalDate(), reservationRequest
+                .getDepartureDate(), newReservation));
         return newReservation;
     }
 
-    public Set<LocalDate> findAvailabilityBetween(@Valid DateRangeDto dateRange) {
+    public Set<LocalDate> findAvailabilityBetween(@Valid DateRange dateRange) {
         LocalDate adjustedTo = dateRange.getTo().plusDays(1);
-        Set<ReservationSpot> occupancy = this.reservationSpotRepository.findByReservedDateIsBetween(dateRange.getFrom(), adjustedTo);
-        Set<LocalDate> occupancyDates = occupancy.stream().map(ReservationSpot::getReservedDate).collect(Collectors.toSet());
+        Set<ReservationSpot> occupancy = this.reservationSpotRepository
+                .findByReservedDateIsBetween(dateRange.getFrom(), adjustedTo);
+        Set<LocalDate> occupancyDates = occupancy.stream().map(ReservationSpot::getReservedDate)
+                .collect(Collectors.toSet());
         Set<LocalDate> requestedDates = dateRange.getFrom().datesUntil(adjustedTo).collect(Collectors.toSet());
         return SetUtils.difference(requestedDates, occupancyDates);
     }
 
     public Reservation find(Long id) {
-        return this.reservationRepository.findById(id).orElseThrow(() -> new ReservationNotFoundException("No active reservation found for the given ID"));
+        return this.reservationRepository.findById(id)
+                .orElseThrow(() -> new ReservationNotFoundException("No active reservation found for the given ID"));
     }
 
     public Reservation update(UpdateReservationRequest updateReservationRequest, Long id) {
@@ -93,7 +101,8 @@ public class ReservationService {
             return reservationRepository.save(reservation);
         } catch (DataIntegrityViolationException exc) {
             log.error("Concurrent reservation", exc);
-            throw new CampsiteConcurrentReservation("There was a problem while trying to reserve your spots, please try again", exc);
+            throw new CampsiteConcurrentReservation(
+                    "There was a problem while trying to reserve your spots, please try again", exc);
         }
     }
 
@@ -115,7 +124,8 @@ public class ReservationService {
     private void updateReservationInfo(UpdateReservationRequest updateReservationRequest, Reservation reservation) {
         Set<ReservationSpot> currentReservedSpots = reservation.getReservationSpots();
         //merging spots
-        Set<ReservationSpot> updatedSpots = spotsFrom(updateReservationRequest.getArrivalDate(), updateReservationRequest.getDepartureDate(), reservation);
+        Set<ReservationSpot> updatedSpots = spotsFrom(updateReservationRequest
+                .getArrivalDate(), updateReservationRequest.getDepartureDate(), reservation);
         currentReservedSpots.removeIf(i -> !updatedSpots.contains(i));
         currentReservedSpots.addAll(updatedSpots);
         if (StringUtils.isNotBlank(updateReservationRequest.getFullname())) {

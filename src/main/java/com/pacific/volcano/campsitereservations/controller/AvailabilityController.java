@@ -1,8 +1,8 @@
 package com.pacific.volcano.campsitereservations.controller;
 
 import com.pacific.volcano.campsitereservations.api.AvailabilityResponse;
+import com.pacific.volcano.campsitereservations.domain.DateRange;
 import com.pacific.volcano.campsitereservations.service.ReservationService;
-import dto.DateRangeDto;
 import lombok.AllArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
@@ -24,19 +24,23 @@ public class AvailabilityController {
 
     /**
      * Queries for campsite availability on a given range
+     *
      * @param from
      * @param to
      * @return AvailabilityResponse
      */
     @GetMapping
-    public ResponseEntity<AvailabilityResponse> findAvailability(@RequestParam(required = false) @Future @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from, @Future @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam(required = false) LocalDate to) {
-        DateRangeDto  dateRange = completeDateRange(DateRangeDto.builder().from(from).to(to).build());
-        return ResponseEntity.ok(AvailabilityResponse.createFrom(this.reservationService.findAvailabilityBetween(dateRange),from,to));
+    public ResponseEntity<AvailabilityResponse> findAvailability(
+            @RequestParam(required = false) @Future @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @Future @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam(required = false) LocalDate to) {
+        DateRange dateRange = completeDateRange(DateRange.builder().from(from).to(to).build());
+        return ResponseEntity.ok(AvailabilityResponse
+                .createFrom(this.reservationService.findAvailabilityBetween(dateRange), from, to));
     }
 
-    private DateRangeDto completeDateRange(DateRangeDto dateRange) {
-        if(dateRange.getFrom() == null && dateRange.getTo() == null) {
-            return DateRangeDto.builder().from(LocalDate.now()).to(LocalDate.now().plusMonths(1)).build();
+    private DateRange completeDateRange(DateRange dateRange) {
+        if (dateRange.getFrom() == null && dateRange.getTo() == null) {
+            return DateRange.builder().from(LocalDate.now()).to(LocalDate.now().plusMonths(1)).build();
         }
         return dateRange;
     }

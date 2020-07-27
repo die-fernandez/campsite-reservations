@@ -10,12 +10,12 @@ import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Constraint(validatedBy = ConsistentDateParameterValidator.class)
-@Target({ TYPE })
+@Target({TYPE})
 @Retention(RUNTIME)
 @Documented
 public @interface ConsistentDateParameters {
     String message() default
-                    "The reservation date range provided is invalid";
+            "The reservation date range provided is invalid";
 
     Class<?>[] groups() default {};
 

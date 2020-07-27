@@ -10,12 +10,12 @@ import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Constraint(validatedBy = AvailabilityDateRangeValidator.class)
-@Target({ TYPE })
+@Target({TYPE})
 @Retention(RUNTIME)
 @Documented
 public @interface ValidAvailabilityRange {
     String message() default
-                    "The availability date range provided is invalid";
+            "The availability date range provided is invalid";
 
     Class<?>[] groups() default {};
 

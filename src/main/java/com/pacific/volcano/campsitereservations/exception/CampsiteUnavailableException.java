@@ -1,9 +1,9 @@
 package com.pacific.volcano.campsitereservations.exception;
 
 public class CampsiteUnavailableException
-                extends RuntimeException {
+        extends RuntimeException {
     public CampsiteUnavailableException(String description, Exception exc) {
-        super(description,exc);
+        super(description, exc);
     }
 
     public CampsiteUnavailableException(String description) {

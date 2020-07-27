@@ -1,16 +1,14 @@
 package com.pacific.volcano.campsitereservations.validation;
 
 import com.pacific.volcano.campsitereservations.api.DateRangeValidatable;
-import com.pacific.volcano.campsitereservations.api.ReservationRequest;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.constraintvalidation.SupportedValidationTarget;
 import javax.validation.constraintvalidation.ValidationTarget;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 
-import static java.time.temporal.ChronoUnit.*;
+import static java.time.temporal.ChronoUnit.DAYS;
 
 @SupportedValidationTarget(ValidationTarget.ANNOTATED_ELEMENT)
 public class ConsistentDateParameterValidator implements ConstraintValidator<ConsistentDateParameters, DateRangeValidatable> {
@@ -45,6 +43,12 @@ public class ConsistentDateParameterValidator implements ConstraintValidator<Con
             return false;
         }
 
+        if (!toValidate.getFrom().isAfter(LocalDate.now().minusDays(1))) {
+            context.buildConstraintViolationWithTemplate("Arrival Date should be in the future")
+                    .addConstraintViolation();
+            return false;
+        }
+
         //validate stay between allowed range
         if (daysToStay < MIN_STAY) {
             context.buildConstraintViolationWithTemplate("minimum stay is 1 day")
@@ -59,13 +63,15 @@ public class ConsistentDateParameterValidator implements ConstraintValidator<Con
         }
 
         if (anticipation < MIN_ANTICIPATION) {
-            context.buildConstraintViolationWithTemplate("Minimum anticipation for a reservation is 1 day before arrival")
+            context.buildConstraintViolationWithTemplate(
+                    "Minimum anticipation for a reservation is 1 day before arrival")
                     .addConstraintViolation();
             return false;
         }
 
         if (anticipation > MAX_ANTICIPATION) {
-            context.buildConstraintViolationWithTemplate("Maximum anticipation for a reservation cannot be more than 30 days ahead of arrival")
+            context.buildConstraintViolationWithTemplate(
+                    "Maximum anticipation for a reservation cannot be more than 30 days ahead of arrival")
                     .addConstraintViolation();
             return false;
         }

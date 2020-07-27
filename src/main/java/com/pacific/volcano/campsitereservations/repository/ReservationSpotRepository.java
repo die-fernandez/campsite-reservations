@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.util.Set;
 
 @Repository
-public interface ReservationSpotRepository  extends JpaRepository<ReservationSpot,Long> {
+public interface ReservationSpotRepository extends JpaRepository<ReservationSpot, Long> {
 
     Set<ReservationSpot> findByReservedDateIsBetween(LocalDate from, LocalDate to);
 }

@@ -4,6 +4,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 
 public class CampsiteConcurrentReservation extends RuntimeException {
     public CampsiteConcurrentReservation(String s, DataIntegrityViolationException exc) {
-        super(s,exc);
+        super(s, exc);
     }
 }
