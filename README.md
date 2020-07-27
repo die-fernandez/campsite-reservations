@@ -1,6 +1,14 @@
 # campsite-reservations
 Repo for the campsite reservations api
 
+# Run with
+./mvnw spring-boot:run
+
+
+# swagger url
+http://localhost:8080/swagger-ui.html#/
+
+
 Back-end Tech Challenge 
 
 An underwater volcano formed a new small island in the Pacific Ocean last month. All the conditions on the island seems perfect and it was decided to open it up for the general public to experience the pristine uncharted territory. 

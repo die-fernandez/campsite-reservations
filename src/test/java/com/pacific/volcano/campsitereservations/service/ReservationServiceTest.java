@@ -1,20 +1,23 @@
 package com.pacific.volcano.campsitereservations.service;
 
+import com.pacific.volcano.campsitereservations.api.UpdateReservationRequest;
 import com.pacific.volcano.campsitereservations.domain.Reservation;
 import com.pacific.volcano.campsitereservations.domain.ReservationSpot;
+import com.pacific.volcano.campsitereservations.exception.ReservationNotFoundException;
 import com.pacific.volcano.campsitereservations.repository.ReservationRepository;
 import com.pacific.volcano.campsitereservations.repository.ReservationSpotRepository;
+import dto.DateRangeDto;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.pacific.volcano.campsitereservations.domain.ReservationSpot.builder;
@@ -31,7 +34,9 @@ class ReservationServiceTest {
 
     private ReservationService reservationService;
 
-    private LocalDate today = LocalDate.now();
+    private final LocalDate today = LocalDate.now();
+
+    Set<ReservationSpot> reservationSpots;
 
     @BeforeEach
     void setup() {
@@ -42,37 +47,54 @@ class ReservationServiceTest {
 
         reservationService = new ReservationService(reservationRepository,reservationSpotRepository);
 
-        Reservation reservation = new Reservation();
-        reservation.setFullName("name1");
-        reservation.setEmail("email");
-        Set<ReservationSpot> reservationSpots =
+        Reservation reservation = Reservation.builder().fullName("name1").email("email").active(true).build();
+         reservationSpots =
                         new HashSet<>(reservedSpots);
         reservation.setReservationSpots(reservationSpots);
 
-        when(reservationSpotRepository.findByReservedDateIsBetween(any(LocalDate.class), any(LocalDate.class))).thenReturn(reservationSpots);
 
     }
 
     @Test void testFindAvailabilityBetween_noAvail() {
-        Set<LocalDate> availabilityBetween = reservationService.findAvailabilityBetween(today.plusDays(3), today.plusDays(5));
+        when(reservationSpotRepository.findByReservedDateIsBetween(any(LocalDate.class), any(LocalDate.class))).thenReturn(reservationSpots);
+
+        DateRangeDto dateRangeDto = DateRangeDto.builder().from(today.plusDays(3)).to(today.plusDays(5)).build();
+        Set<LocalDate> availabilityBetween = reservationService.findAvailabilityBetween(dateRangeDto);
         Assertions.assertTrue(availabilityBetween.isEmpty());
 
     }
 
     @Test void testFindAvailabilityBetween_Avail() {
-        Set<LocalDate> availabilityBetween = reservationService.findAvailabilityBetween(today.plusDays(10), today.plusDays(12));
+        when(reservationSpotRepository.findByReservedDateIsBetween(any(LocalDate.class), any(LocalDate.class))).thenReturn(reservationSpots);
+
+        DateRangeDto dateRangeDto = DateRangeDto.builder().from(today.plusDays(10)).to(today.plusDays(12)).build();
+        Set<LocalDate> availabilityBetween = reservationService.findAvailabilityBetween(dateRangeDto);
         Assertions.assertEquals(3,availabilityBetween.size());
     }
 
     @Test void testFindAvailabilityBetween_partialAvail() {
-        Set<LocalDate> availabilityBetween = reservationService.findAvailabilityBetween(today.plusDays(4), today.plusDays(6));
+        when(reservationSpotRepository.findByReservedDateIsBetween(any(LocalDate.class), any(LocalDate.class))).thenReturn(reservationSpots);
+
+        DateRangeDto dateRangeDto = DateRangeDto.builder().from(today.plusDays(4)).to(today.plusDays(6)).build();
+        Set<LocalDate> availabilityBetween = reservationService.findAvailabilityBetween(dateRangeDto);
         Assertions.assertEquals(1,availabilityBetween.size());
     }
 
+    @Test
+    void testUpdateReservation_notFound() {
+        Long nonexistentId = 1l;
+        Mockito.when(reservationRepository.findById(nonexistentId)).thenReturn(Optional.empty());
+        UpdateReservationRequest updateReservationRequest = UpdateReservationRequest.builder().build();
+        Assertions.assertThrows(ReservationNotFoundException.class,()->reservationService.update(updateReservationRequest,nonexistentId));
+    }
 
-    //TODO add tests validating update when CampsiteUnavailableException, DataIntegrityViolationException
-    //@Test void update() {
-        //fill me
+    @Test
+    void testUpdateReservation_inactive() {
+        Long inactiveId = 1l;
+        Mockito.when(reservationRepository.findById(inactiveId)).thenReturn(Optional.of(Reservation.builder().active(false).build()));
+        UpdateReservationRequest updateReservationRequest = UpdateReservationRequest.builder().build();
+        Assertions.assertThrows(ReservationNotFoundException.class,()->reservationService.update(updateReservationRequest,inactiveId));
+    }
 
 
 }

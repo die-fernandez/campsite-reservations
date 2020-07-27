@@ -18,6 +18,7 @@ public class ReservationResponse {
     private String email;
     private String fullName;
     private List<LocalDate> reservedDays;
+    private boolean active;
 
     @JsonIgnore
     public static ReservationResponse createFrom(Reservation reservation) {
@@ -28,6 +29,7 @@ public class ReservationResponse {
                         .map(ReservationSpot::getReservedDate)
                         .sorted()
                         .collect(Collectors.toList()))
-                .id(reservation.getId()).build();
+                .id(reservation.getId())
+                .active(reservation.isActive()).build();
     }
 }

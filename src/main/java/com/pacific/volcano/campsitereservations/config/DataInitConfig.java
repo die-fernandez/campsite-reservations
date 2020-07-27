@@ -23,22 +23,22 @@ public class DataInitConfig {
             reservationService.create(ReservationRequest.builder()
                             .email("email1")
                             .fullname("name1")
-                            .arrivalDate(LocalDate.of(2020,8,2))
-                            .departureDate(LocalDate.of(2020,8,4))
+                            .arrivalDate(LocalDate.now().plusDays(3))
+                            .departureDate(LocalDate.now().plusDays(5))
                             .build());
 
             reservationService.create(ReservationRequest.builder()
                             .email("email2")
                             .fullname("name2")
-                            .arrivalDate(LocalDate.of(2020,8,12))
-                            .departureDate(LocalDate.of(2020,8,14))
+                            .arrivalDate(LocalDate.now().plusDays(10))
+                            .departureDate(LocalDate.now().plusDays(12))
                             .build());
 
             reservationService.create(ReservationRequest.builder()
                             .email("email3")
                             .fullname("name3")
-                            .arrivalDate(LocalDate.of(2020,8,22))
-                            .departureDate(LocalDate.of(2020,8,24))
+                            .arrivalDate(LocalDate.now().plusDays(21))
+                            .departureDate(LocalDate.now().plusDays(23))
                             .build());
 
         };
