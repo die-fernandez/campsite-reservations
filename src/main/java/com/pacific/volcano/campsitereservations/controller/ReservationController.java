@@ -31,7 +31,7 @@ public class ReservationController {
      * creates a reservation for the campsite on the given dates
      *
      * @param reservationRequest
-     * @return the ReservationResponse with an id or an exception if the reservation was unsuccessful
+     * @return the ReservationResponse with an id or an error if the reservation was unsuccessful
      */
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
@@ -41,6 +41,26 @@ public class ReservationController {
         return ResponseEntity.ok(createFrom(reservationResult));
     }
 
+
+    /**
+     * cancels the reservation with the given id. Note that the reservation will still exist in the store,
+     * with no associated days.
+     * @param id
+     * @return the ReservationResponse in inactive state or an error if the cancel was unsuccessful.
+     */
+    @DeleteMapping(value = "/{id}")
+    public ResponseEntity<ReservationResponse> cancel(@PathVariable("id") Long id) {
+        Reservation reservation = reservationService.cancel(id);
+        log.info("Cancelling new reservation with id {}", reservation.getId());
+        return ResponseEntity.ok(createFrom(reservation));
+    }
+
+    /**
+     * updates a campsite reservation for a given id, can change name and days but not email.
+     * @param updateReservationRequest
+     * @param id
+     * @return the updated ReservationResponse or an error if the reservation could not be updated.
+     */
     @PutMapping(value = "/{id}")
     public ResponseEntity<ReservationResponse> update(
             @RequestBody @Valid UpdateReservationRequest updateReservationRequest, @PathVariable("id") Long id) {
@@ -49,11 +69,20 @@ public class ReservationController {
         return ResponseEntity.ok(createFrom(reservationResult));
     }
 
+    /**
+     * returns the reservation associated with id
+     * @param id
+     * @return ResponseEntity<ReservationResponse>
+     */
     @GetMapping(value = "/{id}")
     public ResponseEntity<ReservationResponse> find(@PathVariable("id") Long id) {
         return ResponseEntity.ok(createFrom(reservationService.find(id)));
     }
 
+    /**
+     * returns all the reservations. Includes cancelled reservations
+     * @return
+     */
     @GetMapping()
     public ResponseEntity<List<ReservationResponse>> findAll() {
         List<ReservationResponse> responseList = reservationService.findAll()
@@ -62,11 +91,5 @@ public class ReservationController {
         return ResponseEntity.ok(responseList);
     }
 
-    @DeleteMapping(value = "/{id}")
-    public ResponseEntity<ReservationResponse> cancel(@PathVariable("id") Long id) {
-        Reservation reservation = reservationService.cancel(id);
-        log.info("Cancelling new reservation with id {}", reservation.getId());
-        return ResponseEntity.ok(createFrom(reservation));
-    }
 
 }
